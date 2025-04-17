@@ -3,10 +3,10 @@
     <!-- 頁面標題區域 -->
     <div class="page-header q-mb-lg">
       <div class="row items-center">
-        <q-icon name="analytics" size="36px" color="primary" class="q-mr-md" />
-        <div>
+        <q-icon name="analytics" size="36px" color="orange" class="q-mr-md" />
+        <div class="flex-center ">
           <h4 class="q-my-none text-weight-bold">使用統計分析</h4>
-          <p class="text-grey-8 q-mt-xs">查看AI助手使用情況和效能分析</p>
+          <p class="text-grey-8 q-my-xs">查看AI助手使用情況和效能分析</p>
         </div>
       </div>
     </div>
@@ -120,23 +120,24 @@
     <!-- 對話趨勢圖表 -->
     <q-card flat bordered class="chart-card q-mb-lg">
       <q-card-section class="chart-header">
-        <div class="text-h6">對話趨勢</div>
-        <q-space />
-        <q-btn flat round dense icon="more_vert">
-          <q-menu>
-            <q-list style="min-width: 150px">
-              <q-item clickable v-close-popup>
-                <q-item-section>匯出圖表</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup>
-                <q-item-section>查看詳情</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup>
-                <q-item-section>刷新數據</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
+        <div class="text-h6 flex">對話趨勢
+          <q-space />
+          <q-btn flat round dense icon="more_vert">
+            <q-menu>
+              <q-list style="min-width: 150px">
+                <q-item clickable v-close-popup>
+                  <q-item-section>匯出圖表</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup>
+                  <q-item-section>查看詳情</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup>
+                  <q-item-section>刷新數據</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+        </div>
       </q-card-section>
 
       <q-separator />
@@ -161,14 +162,14 @@
       <div class="col-12 col-lg-6">
         <q-card flat bordered class="feature-card">
           <q-card-section class="feature-header">
-            <div class="text-h6">
-              <q-icon name="trending_up" size="24px" color="primary" class="q-mr-sm" />
+            <div class="text-h6 flex items-center">
+              <q-icon name="trending_up" size="24px" color="orange" class="q-mr-sm" />
               熱門問題類型
+              <q-space />
+              <q-btn flat round dense icon="help_outline" class="q-ml-sm">
+                <q-tooltip>顯示最常被問到的問題類型</q-tooltip>
+              </q-btn>
             </div>
-            <q-space />
-            <q-btn flat round dense icon="help_outline">
-              <q-tooltip>顯示最常被問到的問題類型</q-tooltip>
-            </q-btn>
           </q-card-section>
 
           <q-separator />
@@ -180,7 +181,7 @@
                   <div class="col-8 text-weight-medium">{{ item.question }}</div>
                   <div class="col-4 text-right text-primary text-weight-bold">{{ item.count }} 次</div>
                 </div>
-                <q-linear-progress :value="item.percentage" color="primary" size="10px" class="q-mt-sm progress-bar" />
+                <q-linear-progress :value="item.percentage" color="orange" size="10px" class="q-mt-sm progress-bar" />
               </div>
             </div>
           </q-card-section>
@@ -191,14 +192,14 @@
       <div class="col-12 col-lg-6">
         <q-card flat bordered class="feature-card">
           <q-card-section class="feature-header">
-            <div class="text-h6">
+            <div class="text-h6 flex items-center">
               <q-icon name="pie_chart" size="24px" color="secondary" class="q-mr-sm" />
               科室分流統計
+              <q-space />
+              <q-btn flat round dense icon="help_outline">
+                <q-tooltip>顯示AI分流到不同科室的比例</q-tooltip>
+              </q-btn>
             </div>
-            <q-space />
-            <q-btn flat round dense icon="help_outline">
-              <q-tooltip>顯示AI分流到不同科室的比例</q-tooltip>
-            </q-btn>
           </q-card-section>
 
           <q-separator />
@@ -370,7 +371,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 // 頁面標題區域
 .page-header {
-  background: linear-gradient(to right, #e3f2fd, #bbdefb);
+  background: linear-gradient(to right, #f8ebde, #ffb769);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);

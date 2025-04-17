@@ -42,29 +42,35 @@
 
         <!-- 右側登入表單 -->
         <div class="col-12 col-md-6 flex flex-center login-form-container">
-          <div class="login-form">
+          <div class="login-form" :class="{ 'shake-animation': loginFailed }">
             <div class="text-center q-mb-xl">
               <div class="text-h4 text-weight-bold q-mb-md text-primary">歡迎回來</div>
               <div class="text-subtitle1 text-grey-7">請登入您的帳號以繼續</div>
             </div>
 
             <q-form @submit="onSubmit" class="q-gutter-y-md">
-              <q-input outlined v-model="username" label="管理員帳號" class="input-field" :rules="[val => !!val || '請輸入帳號']">
+              <q-input outlined v-model="username" label="管理員帳號" class="input-field" :rules="[val => !!val || '請輸入帳號']"
+                :disable="loading">
                 <template v-slot:prepend>
                   <q-icon name="person" color="primary" />
                 </template>
               </q-input>
 
               <q-input outlined type="password" v-model="password" label="密碼" class="input-field"
-                :rules="[val => !!val || '請輸入密碼']">
+                :rules="[val => !!val || '請輸入密碼']" :disable="loading" @keyup.enter="onSubmit">
                 <template v-slot:prepend>
                   <q-icon name="lock" color="primary" />
                 </template>
               </q-input>
 
+              <div v-if="errorMessage" class="text-negative q-mb-md">
+                <q-icon name="error" size="sm" />
+                <span class="q-ml-xs">{{ errorMessage }}</span>
+              </div>
+
               <div class="flex justify-between items-center q-mt-md">
-                <q-checkbox v-model="rememberMe" label="記住我" color="primary" />
-                <q-btn flat color="primary" label="忘記密碼？" class="text-weight-medium" />
+                <q-checkbox v-model="rememberMe" label="記住我" color="primary" :disable="loading" />
+                <q-btn flat color="primary" label="忘記密碼？" class="text-weight-medium" :disable="loading" />
               </div>
 
               <q-btn unelevated color="primary" size="lg" class="full-width q-py-sm q-mt-lg login-btn" label="登入系統"
@@ -95,25 +101,38 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { useUserStore } from 'src/stores/user-store'
 
 const $q = useQuasar()
 const router = useRouter()
+const route = useRoute()
+const userStore = useUserStore()
 
 const username = ref('')
 const password = ref('')
 const rememberMe = ref(false)
 const loading = ref(false)
 const initialized = ref(false)
+const loginFailed = ref(false)
+const errorMessage = ref('')
 
 // 添加一些動畫效果
 onMounted(() => {
   // 檢查是否已經登入
-  const token = localStorage.getItem('auth_token')
-  if (token) {
-    router.push('/admin/knowledge')
-    return
+  if (userStore.checkAuth()) {
+    router.push('/admin/knowledge').catch(err => {
+      console.error('Navigation error:', err);
+    });
+    return;
+  }
+
+  // 從localStorage嘗試獲取保存的用戶名
+  const savedUsername = localStorage.getItem('remembered_username')
+  if (savedUsername) {
+    username.value = savedUsername
+    rememberMe.value = true
   }
 
   // 添加動畫延遲，使頁面順暢呈現
@@ -123,18 +142,22 @@ onMounted(() => {
 })
 
 const onSubmit = async () => {
+  // 重置錯誤狀態
+  errorMessage.value = ''
+  loginFailed.value = false
+
   try {
     loading.value = true
 
-    // 模擬加載
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    // 使用store進行登入
+    const success = await userStore.login(username.value, password.value)
 
-    // 模擬登入成功
-    if (username.value === 'admin' && password.value === 'password') {
-      // 儲存認證信息
-      localStorage.setItem('auth_token', 'dummy_token')
+    if (success) {
+      // 保存記住的用戶名
       if (rememberMe.value) {
-        localStorage.setItem('remember_me', 'true')
+        localStorage.setItem('remembered_username', username.value)
+      } else {
+        localStorage.removeItem('remembered_username')
       }
 
       // 顯示加載中動畫
@@ -149,36 +172,38 @@ const onSubmit = async () => {
         $q.loading.hide()
 
         // 登入成功後跳轉
-        router.push('/admin/knowledge')
+        const redirectPath = route.query.redirect as string || '/admin/knowledge'
+        router.push(redirectPath).catch(err => console.error('Navigation error:', err))
 
         $q.notify({
           color: 'positive',
-          message: '歡迎回來，管理員！',
+          message: `歡迎回來，${username.value}！`,
           icon: 'check_circle',
           position: 'top',
           timeout: 2000
         })
       }, 1000)
     } else {
-      // 登入失敗，添加動畫效果
+      // 登入失敗
+      errorMessage.value = '帳號或密碼錯誤'
+      loginFailed.value = true
+
       $q.notify({
         color: 'negative',
-        message: '帳號或密碼錯誤',
+        message: '登入失敗：帳號或密碼錯誤',
         icon: 'error',
         position: 'top',
         timeout: 3000
       })
 
-      // 添加晃動效果
-      const loginForm = document.querySelector('.login-form')
-      if (loginForm) {
-        loginForm.classList.add('shake-animation')
-        setTimeout(() => {
-          loginForm.classList.remove('shake-animation')
-        }, 500)
-      }
+      // 5秒後重置晃動狀態
+      setTimeout(() => {
+        loginFailed.value = false
+      }, 1000)
     }
   } catch (error) {
+    errorMessage.value = '登入時發生錯誤，請稍後再試'
+
     $q.notify({
       color: 'negative',
       message: '登入時發生錯誤',

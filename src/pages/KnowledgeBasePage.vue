@@ -31,16 +31,18 @@
           <div class="col-12 col-md-4">
             <div class="guide-item">
               <div class="text-weight-medium">新增知識</div>
-              <p class="q-mt-xs">點擊右上角「新增知識」按鈕，填寫知識資料後儲存。新知識將自動更新到AI系統。</p>
+              <p class="q-mt-xs">
+                點擊右上角「新增知識」按鈕，填寫知識資料後儲存。新知識將自動更新到AI系統。
+              </p>
             </div>
           </div>
-
-
 
           <div class="col-12 col-md-4">
             <div class="guide-item">
               <div class="text-weight-medium">知識內容</div>
-              <p class="q-mt-xs">請使用簡明的標題和詳細的內容，內容支援Markdown格式，可以更好地組織醫療資訊。</p>
+              <p class="q-mt-xs">
+                請使用簡明的標題和詳細的內容，內容支援Markdown格式，可以更好地組織醫療資訊。
+              </p>
             </div>
           </div>
         </div>
@@ -213,16 +215,14 @@
                 </q-select>
 
                 <q-input v-model="knowledgeForm.title" label="知識標題" outlined class="q-mb-md"
-                  :rules="[val => !!val || '標題不能為空']">
+                  :rules="[(val) => !!val || '標題不能為空']">
                   <template v-slot:prepend>
                     <q-icon name="title" color="primary" />
                   </template>
                 </q-input>
 
-
-
                 <q-input v-model="knowledgeForm.content" label="知識內容" type="textarea" outlined autogrow :rows="12"
-                  class="content-editor" :rules="[val => !!val || '內容不能為空']" />
+                  class="content-editor" :rules="[(val) => !!val || '內容不能為空']" />
 
                 <div class="row justify-between q-mt-md">
                   <div class="text-caption text-grey-8">
@@ -260,15 +260,12 @@
                     </q-item-section>
                   </q-item>
 
-
-
                   <q-item>
                     <q-item-section>
                       <q-item-label overline>內容預覽 (前100字)</q-item-label>
                       <q-item-label class="text-body2">
-                        {{ knowledgeForm.content.substring(0, 100) }}{{ knowledgeForm.content.length > 100 ? '...' :
-                          ''
-                        }}
+                        {{ knowledgeForm.content.substring(0, 100)
+                        }}{{ knowledgeForm.content.length > 100 ? '...' : '' }}
                       </q-item-label>
                     </q-item-section>
                   </q-item>
@@ -296,18 +293,17 @@
         </q-card-section>
 
         <q-card-section class="q-pt-lg">
-          <div class="text-body1 q-mb-md">
-            確認要刪除以下知識嗎？此操作將無法恢復。
-          </div>
+          <div class="text-body1 q-mb-md">確認要刪除以下知識嗎？此操作將無法恢復。</div>
 
           <q-card flat bordered class="delete-item-preview">
             <q-item>
               <q-item-section>
-                <q-item-label class="text-weight-medium">{{ selectedKnowledge?.title }}</q-item-label>
+                <q-item-label class="text-weight-medium">{{
+                  selectedKnowledge?.title
+                  }}</q-item-label>
                 <q-item-label caption lines="2">
-                  {{ selectedKnowledge?.content.substring(0, 100) }}{{ selectedKnowledge?.content.length > 100 ? '...' :
-                    ''
-                  }}
+                  {{ selectedKnowledge?.content.substring(0, 100)
+                  }}{{ selectedKnowledge?.content.length > 100 ? '...' : '' }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -342,53 +338,64 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useQuasar } from 'quasar'
+import { ref, computed, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
 
-const $q = useQuasar()
+const $q = useQuasar();
+
+interface MockKnowledge {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  category: string;
+  tags: string;
+}
 
 // 表格配置
 const columns = [
   { name: 'id', align: 'left' as const, label: 'ID', field: 'id', sortable: true },
   { name: 'title', align: 'left' as const, label: '標題', field: 'title', sortable: true },
-  { name: 'createdAt', align: 'left' as const, label: '創建時間', field: 'createdAt', sortable: true },
-  { name: 'updatedAt', align: 'left' as const, label: '更新時間', field: 'updatedAt', sortable: true }
-]
+  {
+    name: 'createdAt',
+    align: 'left' as const,
+    label: '創建時間',
+    field: 'createdAt',
+    sortable: true,
+  },
+  {
+    name: 'updatedAt',
+    align: 'left' as const,
+    label: '更新時間',
+    field: 'updatedAt',
+    sortable: true,
+  },
+];
 
 const pagination = ref({
-  rowsPerPage: 10
-})
+  rowsPerPage: 10,
+});
 
 // 狀態管理
-const loading = ref(false)
-const searchText = ref('')
-const sortByNewest = ref(true)
-const knowledgeDialog = ref(false)
-const viewDialog = ref(false)
-const isEditing = ref(false)
-const deleteDialog = ref(false)
-const saving = ref(false)
-const deleting = ref(false)
-const selectedKnowledge = ref<any>(null)
-const knowledgeViewDialog = ref(false)
-const viewKnowledgeTitle = ref('')
-const viewKnowledgeContent = ref('')
-const formStep = ref(1)
-const showGuide = ref(true) // 是否顯示指南卡片
-
-const currentPage = ref(1) // 卡片視圖的當前頁碼
-const itemsPerPage = 9 // 卡片視圖每頁顯示的項目數
-
+const loading = ref(false);
+const searchText = ref('');
+const sortByNewest = ref(true);
+const knowledgeDialog = ref(false);
+const viewDialog = ref(false);
+const isEditing = ref(false);
+const deleteDialog = ref(false);
+const saving = ref(false);
+const deleting = ref(false);
+const selectedKnowledge = ref<MockKnowledge>({} as MockKnowledge);
+const knowledgeViewDialog = ref(false);
+const viewKnowledgeTitle = ref('');
+const viewKnowledgeContent = ref('');
+const formStep = ref(1);
+const showGuide = ref(true); // 是否顯示指南卡片
 
 // 分類選項
-const categoryOptions = [
-  '掛號流程',
-  '醫療服務',
-  '體檢項目',
-  '醫院設施',
-  '醫保政策',
-  '健康指南'
-]
+const categoryOptions = ['掛號流程', '醫療服務', '體檢項目', '醫院設施', '醫保政策', '健康指南'];
 
 // 表單數據
 const knowledgeForm = ref({
@@ -396,124 +403,128 @@ const knowledgeForm = ref({
   title: '',
   content: '',
   category: '醫療服務',
-  tags: ''
-})
+  tags: '',
+});
 
 // 模擬數據
 const knowledgeList = ref([
   {
     id: '1',
     title: '掛號流程指南',
-    content: '本醫院採用線上預約與現場掛號兩種方式。線上預約可透過醫院官網或APP進行。現場掛號請至一樓服務台。\n\n線上預約流程：\n1. 在官網或APP註冊帳號\n2. 選擇需要預約的科室\n3. 選擇醫生和時段\n4. 填寫個人資料\n5. 確認預約信息\n\n現場掛號流程：\n1. 攜帶有效證件到一樓服務台\n2. 告知服務人員需要掛號的科室\n3. 繳納掛號費\n4. 等待叫號',
+    content:
+      '本醫院採用線上預約與現場掛號兩種方式。線上預約可透過醫院官網或APP進行。現場掛號請至一樓服務台。\n\n線上預約流程：\n1. 在官網或APP註冊帳號\n2. 選擇需要預約的科室\n3. 選擇醫生和時段\n4. 填寫個人資料\n5. 確認預約信息\n\n現場掛號流程：\n1. 攜帶有效證件到一樓服務台\n2. 告知服務人員需要掛號的科室\n3. 繳納掛號費\n4. 等待叫號',
     createdAt: '2025-03-15 09:30',
     updatedAt: '2025-03-15 09:30',
     category: '掛號流程',
-    tags: '掛號,預約,流程'
+    tags: '掛號,預約,流程',
   },
   {
     id: '2',
     title: '常見檢查項目說明',
-    content: '本院提供的常見檢查項目包括：血常規、尿常規、肝功能、腎功能、心電圖、X光等。檢查前請遵循醫囑做好相應準備。\n\n各項檢查注意事項：\n\n血常規：空腹為佳，抽血前一天避免劇烈運動\n尿常規：清晨第一次尿液最佳，女性月經期避免\n肝腎功能：需空腹8小時以上\n心電圖：檢查前避免劇烈運動，保持情緒平穩\nX光：孕婦禁忌，檢查前需脫除金屬飾品\n\n如有任何疑問，請諮詢您的主治醫師或護理人員。',
+    content:
+      '本院提供的常見檢查項目包括：血常規、尿常規、肝功能、腎功能、心電圖、X光等。檢查前請遵循醫囑做好相應準備。\n\n各項檢查注意事項：\n\n血常規：空腹為佳，抽血前一天避免劇烈運動\n尿常規：清晨第一次尿液最佳，女性月經期避免\n肝腎功能：需空腹8小時以上\n心電圖：檢查前避免劇烈運動，保持情緒平穩\nX光：孕婦禁忌，檢查前需脫除金屬飾品\n\n如有任何疑問，請諮詢您的主治醫師或護理人員。',
     createdAt: '2025-03-16 14:20',
     updatedAt: '2025-04-01 10:15',
     category: '醫療服務',
-    tags: '檢查,醫療項目,注意事項'
+    tags: '檢查,醫療項目,注意事項',
   },
   {
     id: '3',
     title: '體檢套餐介紹',
-    content: '本院提供基礎套餐、進階套餐、全面套餐三種體檢套餐。基礎套餐包含血常規、尿常規等基本檢查；進階套餐增加了B超等項目；全面套餐則包含核磁共振等高級檢查。\n\n套餐詳情：\n\n1. 基礎套餐 (NT$3,500)\n   - 一般檢查：身高、體重、血壓、脈搏、體溫\n   - 血液檢查：血常規、血型、肝功能、腎功能、血脂\n   - 尿液檢查：尿常規\n   - 心電圖\n   - 胸部X光\n\n2. 進階套餐 (NT$6,800)\n   - 包含基礎套餐全部項目\n   - 腹部B超：肝、膽、脾、胰、腎\n   - 甲狀腺功能檢查\n   - 腫瘤標記物檢查\n   - 骨密度檢查\n\n3. 全面套餐 (NT$12,000)\n   - 包含進階套餐全部項目\n   - 頭部核磁共振\n   - 全身CT檢查\n   - 心臟超音波\n   - 胃腸鏡檢查\n\n體檢時間：週一至週六 8:00-11:30\n體檢地點：醫院3樓體檢中心\n預約電話：(02)2345-6789',
+    content:
+      '本院提供基礎套餐、進階套餐、全面套餐三種體檢套餐。基礎套餐包含血常規、尿常規等基本檢查；進階套餐增加了B超等項目；全面套餐則包含核磁共振等高級檢查。\n\n套餐詳情：\n\n1. 基礎套餐 (NT$3,500)\n   - 一般檢查：身高、體重、血壓、脈搏、體溫\n   - 血液檢查：血常規、血型、肝功能、腎功能、血脂\n   - 尿液檢查：尿常規\n   - 心電圖\n   - 胸部X光\n\n2. 進階套餐 (NT$6,800)\n   - 包含基礎套餐全部項目\n   - 腹部B超：肝、膽、脾、胰、腎\n   - 甲狀腺功能檢查\n   - 腫瘤標記物檢查\n   - 骨密度檢查\n\n3. 全面套餐 (NT$12,000)\n   - 包含進階套餐全部項目\n   - 頭部核磁共振\n   - 全身CT檢查\n   - 心臟超音波\n   - 胃腸鏡檢查\n\n體檢時間：週一至週六 8:00-11:30\n體檢地點：醫院3樓體檢中心\n預約電話：(02)2345-6789',
     createdAt: '2025-03-20 08:45',
     updatedAt: '2025-03-20 08:45',
     category: '體檢項目',
-    tags: '體檢,套餐,健康檢查'
+    tags: '體檢,套餐,健康檢查',
   },
   {
     id: '4',
     title: '醫院樓層及設施指南',
-    content: '本院各樓層設施及科室分布說明：\n\n1樓：掛號大廳、急診、藥局、便利商店\n2樓：內科部（心臟科、腸胃科、腎臟科）\n3樓：外科部（一般外科、骨科、泌尿科）\n4樓：婦產科、兒科\n5樓：五官科（眼科、耳鼻喉科、牙科）\n6樓：健檢中心\n7樓：手術室、重症加護病房\n8-10樓：住院病房\n\n便民服務：\n- 停車場：地下1-3樓\n- ATM：1樓大廳左側\n- 餐廳：1樓後方\n- 祈禱室：8樓東側\n- 圖書室：9樓休息區',
+    content:
+      '本院各樓層設施及科室分布說明：\n\n1樓：掛號大廳、急診、藥局、便利商店\n2樓：內科部（心臟科、腸胃科、腎臟科）\n3樓：外科部（一般外科、骨科、泌尿科）\n4樓：婦產科、兒科\n5樓：五官科（眼科、耳鼻喉科、牙科）\n6樓：健檢中心\n7樓：手術室、重症加護病房\n8-10樓：住院病房\n\n便民服務：\n- 停車場：地下1-3樓\n- ATM：1樓大廳左側\n- 餐廳：1樓後方\n- 祈禱室：8樓東側\n- 圖書室：9樓休息區',
     createdAt: '2025-03-22 15:10',
     updatedAt: '2025-03-22 15:10',
     category: '醫院設施',
-    tags: '樓層,設施,地圖'
-  }
-])
+    tags: '樓層,設施,地圖',
+  },
+]);
 
 // 過濾後的知識列表
 const filteredKnowledgeList = computed(() => {
-  let result = [...knowledgeList.value]
+  let result = [...knowledgeList.value];
 
   // 搜尋過濾
   if (searchText.value) {
-    const search = searchText.value.toLowerCase()
-    result = result.filter(item =>
-      item.title.toLowerCase().includes(search) ||
-      item.content.toLowerCase().includes(search)
-    )
+    const search = searchText.value.toLowerCase();
+    result = result.filter(
+      (item) =>
+        item.title.toLowerCase().includes(search) || item.content.toLowerCase().includes(search),
+    );
   }
 
   // 排序
   if (sortByNewest.value) {
-    result.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    result.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   } else {
-    result.sort((a, b) => a.title.localeCompare(b.title))
+    result.sort((a, b) => a.title.localeCompare(b.title));
   }
 
-  return result
-})
+  return result;
+});
 
 // 查看知識詳情
-const viewKnowledge = (knowledge: any) => {
-  selectedKnowledge.value = knowledge
-  viewDialog.value = true
-}
+const viewKnowledge = (knowledge: MockKnowledge) => {
+  selectedKnowledge.value = knowledge;
+  viewDialog.value = true;
+};
 
 // 打開新增對話框
 const openAddDialog = () => {
-  isEditing.value = false
-  formStep.value = 1
+  isEditing.value = false;
+  formStep.value = 1;
   knowledgeForm.value = {
     id: '',
     title: '',
     content: '',
     category: '醫療服務',
-    tags: ''
-  }
-  knowledgeDialog.value = true
-}
+    tags: '',
+  };
+  knowledgeDialog.value = true;
+};
 
 // 打開編輯對話框
-const openEditDialog = (knowledge: any) => {
-  isEditing.value = true
-  formStep.value = 1
+const openEditDialog = (knowledge: MockKnowledge) => {
+  isEditing.value = true;
+  formStep.value = 1;
   knowledgeForm.value = {
     id: knowledge.id,
     title: knowledge.title,
     content: knowledge.content,
     category: knowledge.category || '醫療服務',
-    tags: knowledge.tags || ''
-  }
-  knowledgeDialog.value = true
-}
+    tags: knowledge.tags || '',
+  };
+  knowledgeDialog.value = true;
+};
 
 // 從查看頁面進入編輯
 const openEditFromView = () => {
   if (selectedKnowledge.value) {
-    openEditDialog(selectedKnowledge.value)
+    openEditDialog(selectedKnowledge.value);
   }
-}
+};
 
 // 儲存知識
 const saveKnowledge = async () => {
   try {
-    saving.value = true
+    saving.value = true;
 
     // 模擬網絡延遲
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     if (isEditing.value) {
       // 更新現有知識
-      const index = knowledgeList.value.findIndex(item => item.id === knowledgeForm.value.id)
+      const index = knowledgeList.value.findIndex((item) => item.id === knowledgeForm.value.id);
       if (index !== -1) {
         const updatedKnowledge = {
           id: knowledgeForm.value.id, // Explicitly set id as non-optional
@@ -522,9 +533,9 @@ const saveKnowledge = async () => {
           category: knowledgeForm.value.category,
           tags: knowledgeForm.value.tags,
           createdAt: knowledgeList.value[index]?.createdAt || new Date().toLocaleString(), // Maintain the original creation date
-          updatedAt: new Date().toLocaleString()
-        }
-        knowledgeList.value[index] = updatedKnowledge
+          updatedAt: new Date().toLocaleString(),
+        };
+        knowledgeList.value[index] = updatedKnowledge;
       }
 
       $q.notify({
@@ -532,12 +543,14 @@ const saveKnowledge = async () => {
         message: '知識更新成功',
         icon: 'check_circle',
         position: 'top',
-        timeout: 2000
-      })
+        timeout: 2000,
+      });
     } else {
       // 新增知識
-      const now = new Date().toLocaleString()
-      const newId = (Math.max(...knowledgeList.value.map(item => parseInt(item.id))) + 1).toString()
+      const now = new Date().toLocaleString();
+      const newId = (
+        Math.max(...knowledgeList.value.map((item) => parseInt(item.id))) + 1
+      ).toString();
 
       knowledgeList.value.push({
         id: newId,
@@ -546,49 +559,49 @@ const saveKnowledge = async () => {
         category: knowledgeForm.value.category,
         tags: knowledgeForm.value.tags,
         createdAt: now,
-        updatedAt: now
-      })
+        updatedAt: now,
+      });
 
       $q.notify({
         color: 'positive',
         message: '知識新增成功',
         icon: 'check_circle',
         position: 'top',
-        timeout: 2000
-      })
+        timeout: 2000,
+      });
     }
 
-    knowledgeDialog.value = false
+    knowledgeDialog.value = false;
   } catch (error) {
     $q.notify({
       color: 'negative',
       message: '儲存失敗',
       icon: 'error',
-      position: 'top'
-    })
-    console.error(error)
+      position: 'top',
+    });
+    console.error(error);
   } finally {
-    saving.value = false
+    saving.value = false;
   }
-}
+};
 
 // 確認刪除
-const confirmDelete = (knowledge: any) => {
-  selectedKnowledge.value = knowledge
-  deleteDialog.value = true
-}
+const confirmDelete = (knowledge: MockKnowledge) => {
+  selectedKnowledge.value = knowledge;
+  deleteDialog.value = true;
+};
 
 // 刪除知識
 const deleteKnowledge = async () => {
   try {
-    deleting.value = true
+    deleting.value = true;
 
     // 模擬網絡延遲
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    const index = knowledgeList.value.findIndex(item => item.id === selectedKnowledge.value.id)
+    const index = knowledgeList.value.findIndex((item) => item.id === selectedKnowledge.value.id);
     if (index !== -1) {
-      knowledgeList.value.splice(index, 1)
+      knowledgeList.value.splice(index, 1);
     }
 
     $q.notify({
@@ -596,70 +609,69 @@ const deleteKnowledge = async () => {
       message: '知識刪除成功',
       icon: 'check_circle',
       position: 'top',
-      timeout: 2000
-    })
+      timeout: 2000,
+    });
 
-    deleteDialog.value = false
+    deleteDialog.value = false;
   } catch (error) {
     $q.notify({
       color: 'negative',
       message: '刪除失敗',
       icon: 'error',
-      position: 'top'
-    })
-    console.error(error)
+      position: 'top',
+    });
+    console.error(error);
   } finally {
-    deleting.value = false
+    deleting.value = false;
   }
-}
+};
 
 // 刷新數據
 const refreshData = async () => {
   try {
-    loading.value = true
+    loading.value = true;
 
     // 模擬數據刷新
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     $q.notify({
       color: 'info',
       message: '數據已刷新',
       icon: 'refresh',
-      position: 'top'
-    })
+      position: 'top',
+    });
   } catch (error) {
-    console.error('刷新失敗:', error)
+    console.error('刷新失敗:', error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 載入數據
 onMounted(async () => {
   try {
-    loading.value = true
+    loading.value = true;
 
     // 模擬數據加載
-    await new Promise(resolve => setTimeout(resolve, 1500))
-
+    await new Promise((resolve) => setTimeout(resolve, 1500));
   } catch (error) {
     $q.notify({
       color: 'negative',
       message: '載入知識庫數據失敗',
       icon: 'error',
-      position: 'top'
-    })
-    console.error(error)
+      position: 'top',
+    });
+    console.error(error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>
 // 頁面標題樣式
 .page-header {
-  background: linear-gradient(to right, #e3f2fd, #bbdefb);
+  background: linear-gradient(to right, #e3f2fd, #a6d7ff);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -718,7 +730,9 @@ onMounted(async () => {
 .add-button {
   border-radius: 8px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
 
   &:hover {
     transform: translateY(-2px);

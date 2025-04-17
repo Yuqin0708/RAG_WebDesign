@@ -2,15 +2,8 @@
   <q-layout view="hHh LpR lFf">
     <q-header elevated class="bg-gradient text-white">
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-          class="q-mr-sm"
-        />
+        <q-btn v-if="userStore.loggedIn" flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer"
+          class="q-mr-sm" />
 
         <q-toolbar-title class="row items-center no-wrap">
           <q-icon name="local_hospital" size="28px" class="q-mr-sm" />
@@ -63,13 +56,9 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-      content-class="sidebar-gradient"
-      :width="250"
-    >
+    <q-drawer v-if="userStore.loggedIn" v-model="leftDrawerOpen" show-if-above bordered content-class="sidebar-gradient"
+      behavior="desktop" :width="230">
+
       <q-scroll-area class="fit">
         <div class="drawer-header q-py-md q-px-lg flex">
           <q-avatar size="40px" class="q-mr-md">
@@ -77,11 +66,12 @@
           </q-avatar>
           <div>
             <div class="text-weight-bold text-black">醫院AI助手</div>
-            <div class="text-blue-4 text-caption">智能醫療服務</div>
+            <div class="text-grey-8 text-caption">智能醫療服務</div>
           </div>
         </div>
 
         <q-separator dark />
+
         <q-list padding>
           <q-item-label header class="text-indigo-9 q-pb-xs">
             <div class="row items-center">
@@ -106,7 +96,7 @@
           <EssentialLink title="系統狀態" icon="monitor_heart" link="/admin/status" />
         </q-list>
 
-        <div class="absolute-bottom q-pa-md">
+        <div class="absolute-bottom q-pa-sm">
           <q-card flat bordered class="system-status">
             <q-item>
               <q-item-section avatar>
@@ -121,6 +111,7 @@
         </div>
       </q-scroll-area>
     </q-drawer>
+
     <q-footer bordered class="bg-white text-grey-8">
       <q-toolbar>
         <q-toolbar-title class="text-caption">
@@ -130,11 +121,7 @@
     </q-footer>
     <q-page-container>
       <div class="q-pa-md">
-        <transition
-          appear
-          enter-active-class="animated fadeIn"
-          leave-active-class="animated fadeOut"
-        >
+        <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
           <router-view />
         </transition>
       </div>
@@ -147,11 +134,16 @@ import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 import EssentialLink from 'components/EssentialLink.vue';
+import { useUserStore } from 'src/stores/user-store';
 
 const $q = useQuasar();
 const router = useRouter();
 const route = useRoute();
+
+const userStore = useUserStore();
+
 const leftDrawerOpen = ref(false);
+
 
 interface EssentialLinkProps {
   title: string;
@@ -195,6 +187,7 @@ const toggleLeftDrawer = () => {
 
 const logout = async () => {
   // TODO: 實際登出邏輯
+  userStore.logout();
   localStorage.removeItem('auth_token');
   await router.push('/login');
 };
@@ -229,7 +222,7 @@ onMounted(async () => {
 }
 
 .drawer-header {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 134, 252, 0.174);
 }
 
 .system-status {
